@@ -26,9 +26,13 @@ void PlayScene::draw()
 
 void PlayScene::update()
 {
-	if (movementEnabled)
+	if (m_pProjectile->getTransform()->position.y <= *startingY)
 	{
 		m_pProjectile->getRigidBody()->velocity.y += *accelerationGravity;
+	}
+	else
+	{
+		m_pProjectile->getRigidBody()->velocity *= 0;
 	}
 
 	updateDisplayList();
@@ -40,6 +44,9 @@ void PlayScene::update()
 		*startingX + (100.0f * cos(leaRadians)),
 		*startingY - (100.0f * sin(leaRadians))
 	);
+
+	distanceTravelled = m_pProjectile->getTransform()->position.x - *startingX;
+	m_pDistanceLabel->setText("Distance Travelled: " + std::to_string(distanceTravelled));
 }
 
 void PlayScene::clean()
@@ -110,10 +117,9 @@ void PlayScene::handleEvents()
 
 	if (EventManager::Instance().isKeyDown(SDL_SCANCODE_SPACE))
 	{
-		//allow projectile to be affected by gravity
-		movementEnabled = true;
-		//reset projectile location
+		//reset projectile location and velocity
 		m_pProjectile->getTransform()->position = startingPos;
+		m_pProjectile->getRigidBody()->velocity *= 0.0f;
 		//yeet the projectile
 		m_pProjectile->getRigidBody()->velocity.x = *launchSpeed * cos(leaRadians);
 		m_pProjectile->getRigidBody()->velocity.y = -(*launchSpeed * sin(leaRadians));
@@ -122,14 +128,16 @@ void PlayScene::handleEvents()
 
 void PlayScene::start()
 {
+
+
 	// Set GUI Title
 	m_guiTitle = "Play Scene";
 	
-	startingX = new float(200.0f);
-	startingY = new float (400.0f);
-	launchElevationAngle = new float (45.0f);
-	launchSpeed = new float (47.5f);
-	accelerationGravity = new float (4.9f);
+	startingX = new float(10.0f);
+	startingY = new float (550.0f);
+	launchElevationAngle = new float (15.8896328215f);
+	launchSpeed = new float (95.0f);
+	accelerationGravity = new float (9.8f);
 
 	float leaRadians = *launchElevationAngle * Util::Deg2Rad;
 
@@ -140,10 +148,10 @@ void PlayScene::start()
 	);
 
 	/* Instructions Label */
-	m_pInstructionsLabel = new Label("Press the backtick (`) character to toggle Debug View", "Consolas");
-	m_pInstructionsLabel->getTransform()->position = glm::vec2(Config::SCREEN_WIDTH * 0.5f, 500.0f);
+	m_pDistanceLabel = new Label("Distance Travelled: " + std::to_string(distanceTravelled), "Consolas");
+	m_pDistanceLabel->getTransform()->position = glm::vec2(Config::SCREEN_WIDTH * 0.5f, 100.0f);
 
-	addChild(m_pInstructionsLabel);
+	addChild(m_pDistanceLabel);
 
 	/* Projectile to model */
 	m_pProjectile = new Obstacle();
@@ -173,6 +181,7 @@ void PlayScene::GUI_Function() const
 
 	if (ImGui::SliderFloat("Starting X", startingX, 0.0f, 800.0f))
 	{
+		m_pProjectile->getRigidBody()->velocity *= 0.0f;
 		m_pProjectile->getTransform()->position = startingPos;
 	}
 	if (ImGui::SliderFloat("Launch Angle - Deg", launchElevationAngle, 0.0f, 360.0f))
@@ -187,6 +196,10 @@ void PlayScene::GUI_Function() const
 	{
 
 	}
+
+	//ImGui::Separator();
+
+	//ImGui::Text(std::to_string(distanceTravelled));
 	
 	ImGui::End();
 }

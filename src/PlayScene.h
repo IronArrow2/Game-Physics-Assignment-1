@@ -33,12 +33,15 @@ private:
 
 	// UI Items
 	Label* m_pInstructionsLabel;
+	Label* m_pDistanceLabel;
 
 	float* startingX;
 	float* startingY;
 	float* launchElevationAngle;
 	float* launchSpeed;
 	float* accelerationGravity;
+
+	float distanceTravelled;
 
 	glm::vec2 lineEnd, startingPos;
 };
