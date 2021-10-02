@@ -31,7 +31,8 @@ void Obstacle::draw()
 
 void Obstacle::update()
 {
-	getTransform()->position += getRigidBody()->velocity;
+	getTransform()->position.x += getRigidBody()->velocity.x / 60;
+	getTransform()->position.y += getRigidBody()->velocity.y / 60;
 }
 
 void Obstacle::clean()

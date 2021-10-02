@@ -41,6 +41,10 @@ private:
 	float* launchSpeed;
 	float* accelerationGravity;
 
+	//launch speed and gravity in pixels per second
+	float launchSpeedPPS;
+	float accelerationGravityPPS;
+
 	float distanceTravelled;
 
 	glm::vec2 lineEnd, startingPos;

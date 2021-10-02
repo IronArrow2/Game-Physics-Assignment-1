@@ -19,8 +19,11 @@ PlayScene::~PlayScene()
 
 void PlayScene::draw()
 {
+	TextureManager::Instance().draw("bg", 400, 300, 0, 255, true);
 	drawDisplayList();
-	Util::DrawLine(startingPos, lineEnd);
+
+	Util::DrawLine(startingPos, lineEnd, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
 	SDL_SetRenderDrawColor(Renderer::Instance().getRenderer(), 255, 255, 255, 255);
 }
 
@@ -28,11 +31,12 @@ void PlayScene::update()
 {
 	if (m_pProjectile->getTransform()->position.y <= *startingY)
 	{
-		m_pProjectile->getRigidBody()->velocity.y += *accelerationGravity;
+
+		m_pProjectile->getRigidBody()->velocity.y += (*accelerationGravity / 60);
 	}
 	else
 	{
-		m_pProjectile->getRigidBody()->velocity *= 0;
+		m_pProjectile->getRigidBody()->velocity *= 0.0f;
 	}
 
 	updateDisplayList();
@@ -46,7 +50,7 @@ void PlayScene::update()
 	);
 
 	distanceTravelled = m_pProjectile->getTransform()->position.x - *startingX;
-	m_pDistanceLabel->setText("Distance Travelled: " + std::to_string(distanceTravelled));
+	m_pDistanceLabel->setText("Distance Travelled: " + std::to_string(distanceTravelled) + " Pixels (1 pixel per meter)");
 }
 
 void PlayScene::clean()
@@ -121,20 +125,21 @@ void PlayScene::handleEvents()
 		m_pProjectile->getTransform()->position = startingPos;
 		m_pProjectile->getRigidBody()->velocity *= 0.0f;
 		//yeet the projectile
-		m_pProjectile->getRigidBody()->velocity.x = *launchSpeed * cos(leaRadians);
+		m_pProjectile->getRigidBody()->velocity.x = ((*launchSpeed * cos(leaRadians)));
+		//y velocity must be negated because y coordinate values increase the further down you go
 		m_pProjectile->getRigidBody()->velocity.y = -(*launchSpeed * sin(leaRadians));
 	}
 }
 
 void PlayScene::start()
 {
-
+	TextureManager::Instance().load("../Assets/Textures/background.jpg", "bg");
 
 	// Set GUI Title
 	m_guiTitle = "Play Scene";
 	
 	startingX = new float(10.0f);
-	startingY = new float (550.0f);
+	startingY = new float (400.0f);
 	launchElevationAngle = new float (15.8896328215f);
 	launchSpeed = new float (95.0f);
 	accelerationGravity = new float (9.8f);
@@ -147,11 +152,16 @@ void PlayScene::start()
 		*startingY - (100.0f * sin(leaRadians))
 	);
 
-	/* Instructions Label */
-	m_pDistanceLabel = new Label("Distance Travelled: " + std::to_string(distanceTravelled), "Consolas");
+	/* Labels */
+	m_pDistanceLabel = new Label("Distance Travelled: " + std::to_string(distanceTravelled) + " Pixels (1 pixel per meter)", "Consolas");
 	m_pDistanceLabel->getTransform()->position = glm::vec2(Config::SCREEN_WIDTH * 0.5f, 100.0f);
 
 	addChild(m_pDistanceLabel);
+
+	m_pInstructionsLabel = new Label("Press Space to throw projectile and ` to open debug view", "Consolas");
+	m_pInstructionsLabel->getTransform()->position = glm::vec2(Config::SCREEN_WIDTH * 0.5f, 550.0f);
+
+	addChild(m_pInstructionsLabel);
 
 	/* Projectile to model */
 	m_pProjectile = new Obstacle();
